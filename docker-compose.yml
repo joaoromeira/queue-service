@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Redis - Banco de dados para o Queue-Service
+  redis:
+    image: redis:7-alpine
+    container_name: queue-service-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  # Queue-Service Server (opcional - descomente para rodar via Docker)
+  # queue-service:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: queue-service-server
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - PORT=3000
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - REDIS_DB=0
+  #     - API_TOKEN=test-token-123
+  #     - DEFAULT_CONCURRENCY=3
+  #     - DEFAULT_RETRY_ATTEMPTS=3
+  #     - DEFAULT_RETRY_DELAY=1000
+  #     - WEBHOOK_TIMEOUT=30000
+  #     - WEBHOOK_RETRY_ATTEMPTS=3
+  #     - LOG_LEVEL=info
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #   restart: unless-stopped
+
+  # Redis Commander (interface web para visualizar dados do Redis)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: queue-service-redis-commander
+    ports:
+      - '8081:8081'
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local
