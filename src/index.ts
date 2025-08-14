@@ -9,6 +9,8 @@ import { redisService } from './services/redis';
 import queueRoutes from './routes/queue-routes';
 import jobRoutes from './routes/job-routes';
 import systemRoutes from './routes/system-routes';
+import taskRoutes from './routes/task-routes';
+import webhookRoutes from './routes/webhook-routes';
 
 async function startServer(): Promise<void> {
   try {
@@ -62,6 +64,8 @@ async function startServer(): Promise<void> {
     app.use('/api/queues', queueRoutes);
     app.use('/api', jobRoutes);
     app.use('/api/system', systemRoutes);
+    app.use('/api/tasks', taskRoutes);
+    app.use('/api/webhooks', webhookRoutes);
 
     // Root endpoint
     app.get('/', (req, res) => {
@@ -75,6 +79,8 @@ async function startServer(): Promise<void> {
           queues: '/api/queues',
           jobs: '/api/queues/:queueName/jobs',
           system: '/api/system',
+          tasks: '/api/tasks',
+          webhooks: '/api/webhooks',
         },
         documentation: {
           swagger: '/api/docs', // TODO: Add Swagger docs
@@ -106,6 +112,9 @@ async function startServer(): Promise<void> {
           createJob: 'POST /api/queues/:queueName/jobs',
           systemInfo: 'GET /api/system/info',
           metrics: 'GET /api/system/metrics',
+          createTask: 'POST /api/tasks',
+          listTasks: 'GET /api/tasks',
+          webhooks: 'GET /api/webhooks',
         },
       });
     });
